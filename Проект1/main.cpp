@@ -1,124 +1,163 @@
-#include <windows.h>
-#include <iostream>
-#include <fstream>
-
-using namespace std;
-
 class ROBOT {
 public:
 	int Field_state[10][10]; // состояние поля
-	int x; // координата по горизонтали
-	int y; // координата по вертикали
-	int direct; // направление (0 - вниз, 1 - влево, 2 - вверх, 3 - вправо)
-	int markers;
-	
-	void To_the_left(){
-		if(direct!=3) direct++;
+	int x = 0; // координата по горизонтали
+	int y = 0; // координата по вертикали
+	int direct = 0; // направление (0 - вниз, 1 - влево, 2 - вверх, 3 - вправо)
+	int markers = 0;
+	int Field_result[10][10];
+
+	void Overwrite() {
+		ofstream out("output.txt");
+		//Выведем матрицу
+		if (out.is_open()) {
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < 10; j++) {
+					out << Field_state[i][j] << " ";
+				}
+				if (i != 9) {
+					out << "\n";
+				}
+			}
+			out.close();
+		}
+		else
+		{
+			//Если открытие файла прошло не успешно
+			cout << "Files not found.";
+		}
+	}
+
+	void Test() {
+		bool F = true;
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				if (Field_state[i][j] != Field_result[i][j]) F = false;
+			}
+		}
+		if (F) {
+			cout << "Congratulations! Result achieved." << endl;
+			system("pause");
+		}
+		else cout << "The result is not correct." << endl;
+	}
+
+	void To_the_left() {
+		if (direct != 3) direct++;
 		else direct = 0;
 		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
 	}
-	void To_the_right(){
-		if(direct!=0) direct--;
+	void To_the_right() {
+		if (direct != 0) direct--;
 		else direct = 3;
 		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
 	}
-	void Move(){
+	void Move() {
 		int buf_x = x;
 		int buf_y = y;
-		Switch(direct){
-			case 0:
-			buf_y ++;
+		switch (direct) {
+		case 0:
+			buf_y++;
 			break;
-			case 1:
-			buf_x --;
+		case 1:
+			buf_x--;
 			break;
-			case 2:
-			buf_y --;
+		case 2:
+			buf_y--;
 			break;
-			case 3:
-			buf_x ++;
+		case 3:
+			buf_x++;
 			break;
-			default:
+		default:
 			cout << "Unknown direction." << endl;
 		}
 		if (buf_x < 0 || buf_x > 9 || buf_y < 0 || buf_y > 9) {
 			cout << "Can't go outside the field." << endl;
-			break;
+			return;
 		}
-		else if (Field_state[buf_x][buf_y] == 2){
-			cout ("Impossible, an obstacle in the way.") << endl;
-			break;
-		     }
-		     else {
-			     x = buf_x;
-			     y = buf_y;
-			     cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
-		     }
+		else if (Field_state[buf_x][buf_y] == 2) {
+			cout << ("Impossible, an obstacle in the way.") << endl;
+			return;
+		}
+		else {
+			x = buf_x;
+			y = buf_y;
+			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
+		}
 	}
-	void Take_marker(){
-		if (Field_state[x][y] != 1){
+	void Take_marker() {
+		if (Field_state[x][y] != 1) {
 			cout << "There is no marker here." << endl;
-			break;
+			return;
 		}
 		else {
 			markers++;
 			Field_state[x][y] = 0;
+			Overwrite();
 			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
 		}
 	}
-	void Put_marker(){
-		if(markers == 0){
+	void Put_marker() {
+		if (markers == 0) {
 			cout << "The robot has no markers." << endl;
-			break;
+			return;
 		}
-		else if(Field_state[x][y] != 0){
+		else if (Field_state[x][y] != 0) {
 			cout << "There is already a marker here." << endl;
-			break;
+			return;
 		}
 		else {
 			Field_state[x][y] = 1;
 			markers--;
+			Overwrite();
 			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
 		}
 	}
 	void Command(int n){
-		Switch(n){
-			case 1:
+		switch (n) {
+		case 1:
+			cout << "Command is executed to the left." << endl;
 			To_the_left();
 			break;
-			case 2:
+		case 2:
+			cout << "Command is executed to the right." << endl;
 			To_the_right();
 			break;
-			case 11:
+		case 11:
+			cout << "Command is executed step forward." << endl;
 			Move();
 			break;
-			case 21:
+		case 21:
+			cout << "Command is executed to take the marker." << endl;
 			Take_marker();
 			break;
-			case 21:
+		case 22:
+			cout << "Command is executedto put the marker." << endl;
 			Put_marker();
 			break;
-			default:
+		case 31:
+			cout << "Command is executed to test." << endl;
+			Test();
+			break;
+		default:
 			cout << "Unknown command." << endl;
-		}
 		}
 	}
 };
+
 
 int main(int argc, char* argv[]) {
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 
 	ROBOT robot;
-	robot.x = 0;
-	robot.y = 0;
-	robot.direct = 0;
+	robot.Overwrite();
 	
 	//Создаем файловый поток и связываем его с файлом
 	ifstream in("input.txt");
-	ofstream out("output.txt");
+	ifstream in1("result.txt");
 
-	if (in.is_open() && out.is_open())
+	if (in.is_open())
 	{
 		//Если открытие файла прошло успешно
 
@@ -159,26 +198,70 @@ int main(int argc, char* argv[]) {
 					in >> robot.Field_state[i][j];
 		}
 
-
-		//Выведем матрицу
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 10; j++) {
-				out << robot.Field_state[i][j] << " ";
-			}
-			if (i != 9) {
-				out << "\n";
-			}
-		}
-
-
 		in.close();//под конец закроем файла
-		out.close();
 	}
 	else
 	{
 		//Если открытие файла прошло не успешно
 		cout << "Files not found.";
 	}
+	if (in1.is_open())
+	{
+		int count = 0;
+		int temp;
+
+		while (!in1.eof())
+		{
+			in1 >> temp;
+			count++;
+		}
+		in1.seekg(0, ios::beg);
+		in1.clear();
+		int count_space = 0;
+		char symbol;
+		while (!in1.eof())
+		{
+
+			in1.get(symbol);
+			if (symbol == ' ') count_space++;
+			if (symbol == '\n') break;
+		}
+		in1.seekg(0, ios::beg);
+		in1.clear();
+		if (count == 100 && count_space == 9) {
+			for (int i = 0; i < 10; i++)
+				for (int j = 0; j < 10; j++)
+					in1 >> robot.Field_state[i][j];
+		}
+
+		in1.close();
+	}
+	else
+	{
+
+		cout << "Files not found.";
+	}
+	
+	cout << "Welcome to Robot Marker! I present to you a list of commands :" << endl << "Direction (0 - down, 1 - left, 2 - up, 3 - right)" << endl << "1 - Turn left" << endl << "2 - Turn right" << endl << "11 - Step forward" << endl << "21 - Take the marker" << endl << "22 - Put the marker" << endl << "31 - Test " << endl; /*Вас приветствует робот маркировщик!
+	Представляю вам перечень команд :
+	Направление (0 - вниз, 1 - влево, 2 - вверх, 3 - вправо)
+	1 - Поворот налево
+		2 - Поворот направо
+		11 - Шаг вперёд
+		21 - Взять маркер
+		22 - Положить маркер
+		31 - Протестировать
+*/
+	{
+		//robot.Command(11);
+		//robot.Command(2);
+		//robot.Command(2);
+		//robot.Command(21);
+		//robot.Command(11);
+	}
+
+
 	system("pause");
 	return 0;
 }
+
