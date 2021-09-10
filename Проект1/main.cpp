@@ -231,7 +231,7 @@ int main(int argc, char* argv[]) {
 		if (count == 100 && count_space == 9) {
 			for (int i = 0; i < 10; i++)
 				for (int j = 0; j < 10; j++)
-					in1 >> robot.Field_state[i][j];
+					in1 >> robot.Field_result[i][j];
 		}
 
 		in1.close();
