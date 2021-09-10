@@ -1,3 +1,9 @@
+#include <iostream>
+#include <fstream>
+#include <windows.h>
+
+using namespace std;
+
 class ROBOT {
 public:
 	int Field_state[10][10]; // состояние поля
@@ -45,12 +51,12 @@ public:
 	void To_the_left() {
 		if (direct != 3) direct++;
 		else direct = 0;
-		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
+		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 	}
 	void To_the_right() {
 		if (direct != 0) direct--;
 		else direct = 3;
-		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
+		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 	}
 	void Move() {
 		int buf_x = x;
@@ -75,26 +81,26 @@ public:
 			cout << "Can't go outside the field." << endl;
 			return;
 		}
-		else if (Field_state[buf_x][buf_y] == 2) {
+		else if (Field_state[buf_y][buf_x] == 2) {
 			cout << ("Impossible, an obstacle in the way.") << endl;
 			return;
 		}
 		else {
 			x = buf_x;
 			y = buf_y;
-			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
+			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 		}
 	}
 	void Take_marker() {
-		if (Field_state[x][y] != 1) {
+		if (Field_state[y][x] != 1) {
 			cout << "There is no marker here." << endl;
 			return;
 		}
 		else {
 			markers++;
-			Field_state[x][y] = 0;
+			Field_state[y][x] = 0;
 			Overwrite();
-			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
+			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 		}
 	}
 	void Put_marker() {
@@ -102,15 +108,15 @@ public:
 			cout << "The robot has no markers." << endl;
 			return;
 		}
-		else if (Field_state[x][y] != 0) {
+		else if (Field_state[y][x] != 0) {
 			cout << "There is already a marker here." << endl;
 			return;
 		}
 		else {
-			Field_state[x][y] = 1;
+			Field_state[y][x] = 1;
 			markers--;
 			Overwrite();
-			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[x][y] << "." << endl;
+			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 		}
 	}
 	void Command(int n){
@@ -151,7 +157,6 @@ int main(int argc, char* argv[]) {
 	SetConsoleOutputCP(1251);
 
 	ROBOT robot;
-	robot.Overwrite();
 	
 	//Создаем файловый поток и связываем его с файлом
 	ifstream in("input.txt");
@@ -192,7 +197,6 @@ int main(int argc, char* argv[]) {
 		in.clear();
 
 		if (count == 100 && count_space == 9) {
-			//Считаем матрицу из файла
 			for (int i = 0; i < 10; i++)
 				for (int j = 0; j < 10; j++)
 					in >> robot.Field_state[i][j];
@@ -241,7 +245,10 @@ int main(int argc, char* argv[]) {
 
 		cout << "Files not found.";
 	}
-	
+
+	robot.Overwrite();
+	cout << "Start. Coordinates (" << robot.x << ";" << robot.y << "); Direction: " << robot.direct << "; Markers: " << robot.markers << "; Coordinate state: " << robot.Field_state[robot.y][robot.x] << "." << endl;
+
 	cout << "Welcome to Robot Marker! I present to you a list of commands :" << endl << "Direction (0 - down, 1 - left, 2 - up, 3 - right)" << endl << "1 - Turn left" << endl << "2 - Turn right" << endl << "11 - Step forward" << endl << "21 - Take the marker" << endl << "22 - Put the marker" << endl << "31 - Test " << endl; /*Вас приветствует робот маркировщик!
 	Представляю вам перечень команд :
 	Направление (0 - вниз, 1 - влево, 2 - вверх, 3 - вправо)
@@ -253,11 +260,12 @@ int main(int argc, char* argv[]) {
 		31 - Протестировать
 */
 	{
-		//robot.Command(11);
-		//robot.Command(2);
-		//robot.Command(2);
-		//robot.Command(21);
-		//robot.Command(11);
+	
+		int Commands[204] = {11,21,2,2,11,1,11,11,11,21,2,2,11,2,11,11,11,2,11,11,1,11,21,2,2,11,2,11,11,2,11,11,1,11,2,11,11,2,11,11,11,2,11,21,2,2,11,11,11,1,11,21,1,1,11,2,11,11,2,2,11,11,11,2,11,11,1,11,21,1,1,11,2,11,11,2,11,11,1,11,2,11,11,2,11,11,11,1,11,21,2,2,11,11,11,1,11,21,1,1,11,2,11,11,11,2,11,11,1,11,21,1,1,11,2,11,11,2,11,11,1,11,2,11,11,11,11,1,11,21,1,1,11,2,11,11,1,11,11,11,2,11,21,1,1,11,11,11,1,11,21,1,1,11,2,11,11,2,11,11,11,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,31};
+		for (int i = 0; i < 204; i++) {
+			robot.Command(Commands[i]);
+		}
+		
 	}
 
 
