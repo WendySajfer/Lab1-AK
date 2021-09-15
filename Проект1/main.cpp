@@ -6,41 +6,71 @@
 using namespace std;
 
 class MEMORY {
-public:
+private:
 	int Field_state[10][10]; // состояние поля
 	int x = 0; // координата по горизонтали
 	int y = 0; // координата по вертикали
 	int direct = 0; // направление (0 - вниз, 1 - влево, 2 - вверх, 3 - вправо)
 	int markers = 0;
 	int Field_result[10][10];
-};
-
-class OUTPUT_PROP: {
 public:
-	void prop(){
-	cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
+
+	int get_x() {
+		return x;
+	}
+	void set_x(int X) {
+		x = X;
+	}
+
+	int get_y() {
+		return y;
+	}
+	void set_y(int Y) {
+		y = Y;
+	}
+
+	int get_direct() {
+		return direct;
+	}
+	void set_direct(int Direct) {
+		direct = Direct;
+	}
+
+	int get_markers() {
+		return markers;
+	}
+	void set_x(int Markers) {
+		markers = Markers;
+	}
+
+	int get_Field_state(int i, int j) {
+		return Field_state[i][j];// передать указатель
+	}
+	void set_Field_state(int Field_State[10][10], int i, int j) {
+		Field_state[i][j] = Field_State[i][j];
 	}
 };
 
-class LEFT: {
+class OUTPUT_PROP : private MEMORY {
 public:
-	void To_the_left() {
-		if (buf != 0) direct--;
-		else direct = 3;
-		cout << "Command completed." << endl;
+	void prop() {
+		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 	}
 };
 
-class RIGTH: {
+
+
+class RIGTH : private MEMORY {
 public:
-	void To_the_right() {
+	int To_the_right(int direct) {
 		if (direct != 3) direct++;
 		else direct = 0;
 		cout << "Command completed." << endl;
+		return direct;
 	}
 };
 
-class MOVE {
+class MOVE : private MEMORY {
 public:
 	void Move() {
 		int buf_x = x;
@@ -77,60 +107,7 @@ public:
 	}
 };
 
-class TAKE_MARKER {
-public:
-	void Take_marker() {
-		if (Field_state[y][x] != 1) {
-			cout << "There is no marker here." << endl;
-			return;
-		}
-		else {
-			markers++;
-			Field_state[y][x] = 0;
-			Overwrite();
-			cout << "Command completed." << endl;
-		}
-	}
-};
-
-class PUT_MARKER {
-public:
-	void Put_marker() {
-		if (markers == 0) {
-			cout << "The robot has no markers." << endl;
-			return;
-		}
-		else if (Field_state[y][x] != 0) {
-			cout << "There is already a marker here." << endl;
-			return;
-		}
-		else {
-			Field_state[y][x] = 1;
-			markers--;
-			Overwrite();
-			cout << "Command completed." << endl;
-		}
-	}
-};
-
-class TEST {
-public:
-	void Test() {
-		bool F = true;
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 10; j++) {
-				if (Field_state[i][j] != Field_result[i][j]) F = false;
-			}
-		}
-		if (F) {
-			cout << "Congratulations! Result achieved." << endl;
-			system("pause");
-		}
-		else cout << "The result is not correct." << endl;
-	}
-};
-
-class OWERWRITE {
+class OWERWRITE : private MEMORY {
 public:
 	void Overwrite() {
 		ofstream out("output.txt");
@@ -154,48 +131,120 @@ public:
 	}
 };
 
-class ROBOT: private MEMORY, private OUTPUT_PROP, private LEFT, private RIGHT, private MOVE, private TAKE_MARKER, private PUT_MARKER, private TEST, public OWERWRITE {
-	
+class TAKE_MARKER : private MEMORY {
 public:
-	void Command(int n){
+	void Take_marker() {
+		if (Field_state[y][x] != 1) {
+			cout << "There is no marker here." << endl;
+			return;
+		}
+		else {
+			markers++;
+			Field_state[y][x] = 0;
+			cout << "Command completed." << endl;
+		}
+	}
+};
+
+class PUT_MARKER : private MEMORY {
+public:
+	void Put_marker() {
+		if (markers == 0) {
+			cout << "The robot has no markers." << endl;
+			return;
+		}
+		else if (Field_state[y][x] != 0) {
+			cout << "There is already a marker here." << endl;
+			return;
+		}
+		else {
+			Field_state[y][x] = 1;
+			markers--;
+			cout << "Command completed." << endl;
+		}
+	}
+};
+
+class TEST : private MEMORY {
+public:
+	void Test() {
+		bool F = true;
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				if (Field_state[i][j] != Field_result[i][j]) F = false;
+			}
+		}
+		if (F) {
+			cout << "Congratulations! Result achieved." << endl;
+			system("pause");
+		}
+		else cout << "The result is not correct." << endl;
+	}
+};
+
+class LEFT : private MEMORY {
+public:
+	void To_the_left() {
+		if (direct != 0) direct--;
+		else direct = 3;
+		cout << "Command completed." << endl;
+	}
+};
+
+class ROBOT {
+private:
+	LEFT left;
+	RIGTH right;
+	MOVE move;
+	OWERWRITE ower;
+	TAKE_MARKER take;
+	PUT_MARKER put;
+	TEST test;
+	OUTPUT_PROP output;
+	MEMORY memory;
+public:
+	void Command(int n) {
 		switch (n) {
 		case 1:
 			cout << "Command is executed to the left." << endl;
-			To_the_left();
+			left.To_the_left();
 			break;
 		case 2:
 			cout << "Command is executed to the right." << endl;
-			To_the_right();
+			memory.set_direct(right.To_the_right(memory.get_direct()));
 			break;
 		case 11:
 			cout << "Command is executed step forward." << endl;
-			Move();
+			move.Move();
 			break;
 		case 21:
 			cout << "Command is executed to take the marker." << endl;
-			Take_marker();
+			take.Take_marker();
+			ower.Overwrite();
 			break;
 		case 22:
 			cout << "Command is executedto put the marker." << endl;
-			Put_marker();
+			put.Put_marker();
+			ower.Overwrite();
 			break;
 		case 31:
 			cout << "Command is executed to test." << endl;
-			Test();
+			test.Test();
 			break;
 		default:
 			cout << "Unknown command." << endl;
 		}
-		prop();
+		output.prop();
 	}
 };
+
 
 int main(int argc, char* argv[]) {
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 
 	ROBOT robot;
-	
+
 	//Создаем файловый поток и связываем его с файлом
 	ifstream in("input.txt");
 	ifstream in1("result.txt");
@@ -284,38 +333,29 @@ int main(int argc, char* argv[]) {
 		cout << "Files not found.";
 	}
 
-	robot.Overwrite();
 	cout << "Start. Coordinates (" << robot.x << ";" << robot.y << "); Direction: " << robot.direct << "; Markers: " << robot.markers << "; Coordinate state: " << robot.Field_state[robot.y][robot.x] << "." << endl;
 
 	cout << "Welcome to Robot Marker! I present to you a list of commands :" << endl << "Direction (0 - down, 1 - left, 2 - up, 3 - right)" << endl << "1 - Turn left" << endl << "2 - Turn right" << endl << "11 - Step forward" << endl << "21 - Take the marker" << endl << "22 - Put the marker" << endl << "31 - Test " << endl; /*Вас приветствует робот маркировщик!
-	Представляю вам перечень команд :
-	Направление (0 - вниз, 1 - влево, 2 - вверх, 3 - вправо)
-	1 - Поворот налево
-		2 - Поворот направо
-		11 - Шаг вперёд
-		21 - Взять маркер
-		22 - Положить маркер
-		31 - Протестировать
-*/
+																																																																																	  Представляю вам перечень команд :
+																																																																															  */
 	{
-	
-		int Commands[206] = {11,21,1,1,11,2,11,11,11,21,2,2,11,1,11,11,11,2,11,11,1,11,21,2,2,11,2,11,11,2,11,11,1,11,2,11,11,2,11,11,11,2,11,21,2,2,11,11,11,1,11,21,1,1,11,2,11,11,2,11,11,11,2,11,11,1,11,21,1,1,11,2,11,11,2,11,11,1,11,2,11,11,2,11,11,11,2,11,21,2,2,11,11,11,1,11,21,1,1,11,2,11,11,2,11,11,11,2,11,11,1,11,21,1,1,11,2,11,11,2,11,11,1,11,2,11,11,11,11,1,11,21,1,1,11,2,11,11,1,11,11,11,2,11,21,1,1,11,11,11,1,11,21,1,1,11,2,11,11,2,11,11,11,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,31};
+
+		int Commands[206] = { 11,21,1,1,11,2,11,11,11,21,2,2,11,1,11,11,11,2,11,11,1,11,21,2,2,11,2,11,11,2,11,11,1,11,2,11,11,2,11,11,11,2,11,21,2,2,11,11,11,1,11,21,1,1,11,2,11,11,2,11,11,11,2,11,11,1,11,21,1,1,11,2,11,11,2,11,11,1,11,2,11,11,2,11,11,11,2,11,21,2,2,11,11,11,1,11,21,1,1,11,2,11,11,2,11,11,11,2,11,11,1,11,21,1,1,11,2,11,11,2,11,11,1,11,2,11,11,11,11,1,11,21,1,1,11,2,11,11,1,11,11,11,2,11,21,1,1,11,11,11,1,11,21,1,1,11,2,11,11,2,11,11,11,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,31 };
 		for (int i = 0; i < 206; i++) {
 			/*string s = "\0";
 			while (s != "\n") {
-				string s;
-				cin >> s;
-				if (s != "\n") {
-					int it = stoi(s);
-					robot.Command(it);
-				}
-				else break;
+			string s;
+			cin >> s;
+			if (s != "\n") {
+			int it = stoi(s);
+			robot.Command(it);
+			}
+			else break;
 			}*/
 			cin.get();
 			robot.Command(Commands[i]);
 		}
-		
+
 	}
 	return 0;
 }
-
