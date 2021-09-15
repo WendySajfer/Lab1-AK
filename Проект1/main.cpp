@@ -5,60 +5,38 @@
 
 using namespace std;
 
-class ROBOT {
-public:
+class MEMORY {
 	int Field_state[10][10]; // состояние поля
 	int x = 0; // координата по горизонтали
 	int y = 0; // координата по вертикали
 	int direct = 0; // направление (0 - вниз, 1 - влево, 2 - вверх, 3 - вправо)
 	int markers = 0;
 	int Field_result[10][10];
+};
 
-	void Overwrite() {
-		ofstream out("output.txt");
-		//Выведем матрицу
-		if (out.is_open()) {
-			for (int i = 0; i < 10; i++) {
-				for (int j = 0; j < 10; j++) {
-					out << Field_state[i][j] << " ";
-				}
-				if (i != 9) {
-					out << "\n";
-				}
-			}
-			out.close();
-		}
-		else
-		{
-			//Если открытие файла прошло не успешно
-			cout << "Files not found.";
-		}
+class OUTPUT_PROP: {
+	void prop(){
+	cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 	}
+};
 
-	void Test() {
-		bool F = true;
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 10; j++) {
-				if (Field_state[i][j] != Field_result[i][j]) F = false;
-			}
-		}
-		if (F) {
-			cout << "Congratulations! Result achieved." << endl;
-			system("pause");
-		}
-		else cout << "The result is not correct." << endl;
-	}
-
+class LEFT: {
 	void To_the_left() {
-		if (direct != 0) direct--;
+		if (buf != 0) direct--;
 		else direct = 3;
-		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
+		cout << "Command completed." << endl;
 	}
+};
+
+class RIGTH: {
 	void To_the_right() {
 		if (direct != 3) direct++;
 		else direct = 0;
-		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
+		cout << "Command completed." << endl;
 	}
+};
+
+class MOVE {
 	void Move() {
 		int buf_x = x;
 		int buf_y = y;
@@ -89,9 +67,12 @@ public:
 		else {
 			x = buf_x;
 			y = buf_y;
-			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
+			cout << "Command completed." << endl;
 		}
 	}
+};
+
+class TAKE_MARKER {
 	void Take_marker() {
 		if (Field_state[y][x] != 1) {
 			cout << "There is no marker here." << endl;
@@ -101,9 +82,12 @@ public:
 			markers++;
 			Field_state[y][x] = 0;
 			Overwrite();
-			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
+			cout << "Command completed." << endl;
 		}
 	}
+};
+
+class PUT_MARKER {
 	void Put_marker() {
 		if (markers == 0) {
 			cout << "The robot has no markers." << endl;
@@ -117,9 +101,53 @@ public:
 			Field_state[y][x] = 1;
 			markers--;
 			Overwrite();
-			cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
+			cout << "Command completed." << endl;
 		}
 	}
+};
+
+class TEST {
+	void Test() {
+		bool F = true;
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				if (Field_state[i][j] != Field_result[i][j]) F = false;
+			}
+		}
+		if (F) {
+			cout << "Congratulations! Result achieved." << endl;
+			system("pause");
+		}
+		else cout << "The result is not correct." << endl;
+	}
+};
+
+class OWERWRITE {
+	void Overwrite() {
+		ofstream out("output.txt");
+		//Выведем матрицу
+		if (out.is_open()) {
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < 10; j++) {
+					out << Field_state[i][j] << " ";
+				}
+				if (i != 9) {
+					out << "\n";
+				}
+			}
+			out.close();
+		}
+		else
+		{
+			//Если открытие файла прошло не успешно
+			cout << "Files not found.";
+		}
+	}
+};
+
+class ROBOT: public MEMORY, public OUTPUT_PROP, public LEFT, public RIGHT, public MOVE, public TAKE_MARKER, public PUT_MARKER, public TEST, public OWERWRITE {
+	
+public:
 	void Command(int n){
 		switch (n) {
 		case 1:
@@ -149,9 +177,9 @@ public:
 		default:
 			cout << "Unknown command." << endl;
 		}
+		prop();
 	}
 };
-
 
 int main(int argc, char* argv[]) {
 	SetConsoleCP(1251);
