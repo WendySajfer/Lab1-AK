@@ -43,24 +43,25 @@ public:
 		markers = Markers;
 	}
 
-	int get_Field_state(int i, int j) {
-		return Field_state[i][j];// передать указатель
+	int (& get_Field_state())[10] {
+		return (&Field_state)[10][10];
 	}
-	void set_Field_state(int Field_State[10][10], int i, int j) {
-		Field_state[i][j] = Field_State[i][j];
+
+	int *get_Field_result() {
+		return (&Field_result)[10][10];
 	}
 };
 
 class OUTPUT_PROP : private MEMORY {
 public:
-	void prop() {
+	void prop(int x, int y, int direct, int markers, int (&Field_state)[10][10]) {
 		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 	}
 };
 
 
 
-class RIGTH : private MEMORY {
+class RIGTH {
 public:
 	int To_the_right(int direct) {
 		if (direct != 3) direct++;
@@ -70,9 +71,19 @@ public:
 	}
 };
 
+class LEFT {
+public:
+	int To_the_left(int direct) {
+		if (direct != 0) direct--;
+		else direct = 3;
+		cout << "Command completed." << endl;
+		return direct;
+	}
+};
+
 class MOVE : private MEMORY {
 public:
-	void Move() {
+	int Move(int x, int y, int direct, int markers, int(&Field_state)[10][10]) {
 		int buf_x = x;
 		int buf_y = y;
 		switch (direct) {
@@ -104,7 +115,9 @@ public:
 			y = buf_y;
 			cout << "Command completed." << endl;
 		}
+		return x,y;
 	}
+
 };
 
 class OWERWRITE : private MEMORY {
@@ -182,15 +195,6 @@ public:
 	}
 };
 
-class LEFT : private MEMORY {
-public:
-	void To_the_left() {
-		if (direct != 0) direct--;
-		else direct = 3;
-		cout << "Command completed." << endl;
-	}
-};
-
 class ROBOT {
 private:
 	LEFT left;
@@ -207,7 +211,7 @@ public:
 		switch (n) {
 		case 1:
 			cout << "Command is executed to the left." << endl;
-			left.To_the_left();
+			memory.set_direct(left.To_the_left(memory.get_direct()));
 			break;
 		case 2:
 			cout << "Command is executed to the right." << endl;
@@ -215,7 +219,7 @@ public:
 			break;
 		case 11:
 			cout << "Command is executed step forward." << endl;
-			move.Move();
+			//memory.set_x(move.Move(memory.get_x(), memory.get_y(), memory.get_direct(), memory.get_markers(), memory.get_Field_state()));
 			break;
 		case 21:
 			cout << "Command is executed to take the marker." << endl;
@@ -234,7 +238,7 @@ public:
 		default:
 			cout << "Unknown command." << endl;
 		}
-		output.prop();
+		output.prop(memory.get_x(), memory.get_y(),memory.get_direct(), memory.get_markers(),memory.get_Field_state());
 	}
 };
 
