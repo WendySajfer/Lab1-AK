@@ -6,6 +6,7 @@
 using namespace std;
 
 class MEMORY {
+public:
 	int Field_state[10][10]; // состояние поля
 	int x = 0; // координата по горизонтали
 	int y = 0; // координата по вертикали
@@ -15,12 +16,14 @@ class MEMORY {
 };
 
 class OUTPUT_PROP: {
+public:
 	void prop(){
 	cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 	}
 };
 
 class LEFT: {
+public:
 	void To_the_left() {
 		if (buf != 0) direct--;
 		else direct = 3;
@@ -29,6 +32,7 @@ class LEFT: {
 };
 
 class RIGTH: {
+public:
 	void To_the_right() {
 		if (direct != 3) direct++;
 		else direct = 0;
@@ -37,6 +41,7 @@ class RIGTH: {
 };
 
 class MOVE {
+public:
 	void Move() {
 		int buf_x = x;
 		int buf_y = y;
@@ -73,6 +78,7 @@ class MOVE {
 };
 
 class TAKE_MARKER {
+public:
 	void Take_marker() {
 		if (Field_state[y][x] != 1) {
 			cout << "There is no marker here." << endl;
@@ -88,6 +94,7 @@ class TAKE_MARKER {
 };
 
 class PUT_MARKER {
+public:
 	void Put_marker() {
 		if (markers == 0) {
 			cout << "The robot has no markers." << endl;
@@ -107,6 +114,7 @@ class PUT_MARKER {
 };
 
 class TEST {
+public:
 	void Test() {
 		bool F = true;
 		for (int i = 0; i < 10; i++) {
@@ -123,6 +131,7 @@ class TEST {
 };
 
 class OWERWRITE {
+public:
 	void Overwrite() {
 		ofstream out("output.txt");
 		//Выведем матрицу
@@ -145,7 +154,7 @@ class OWERWRITE {
 	}
 };
 
-class ROBOT: public MEMORY, public OUTPUT_PROP, public LEFT, public RIGHT, public MOVE, public TAKE_MARKER, public PUT_MARKER, public TEST, public OWERWRITE {
+class ROBOT: private MEMORY, private OUTPUT_PROP, private LEFT, private RIGHT, private MOVE, private TAKE_MARKER, private PUT_MARKER, private TEST, private OWERWRITE {
 	
 public:
 	void Command(int n){
