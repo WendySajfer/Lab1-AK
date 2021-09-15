@@ -154,7 +154,7 @@ public:
 	}
 };
 
-class ROBOT: private MEMORY, private OUTPUT_PROP, private LEFT, private RIGHT, private MOVE, private TAKE_MARKER, private PUT_MARKER, private TEST, private OWERWRITE {
+class ROBOT: private MEMORY, private OUTPUT_PROP, private LEFT, private RIGHT, private MOVE, private TAKE_MARKER, private PUT_MARKER, private TEST, public OWERWRITE {
 	
 public:
 	void Command(int n){
