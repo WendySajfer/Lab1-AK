@@ -8,13 +8,15 @@ using namespace std;
 class MEMORY {
 private:
 	int** Field_state = new int*[10]; // состояние поля
-	for (int )
 	int x = 0; // координата по горизонтали
 	int y = 0; // координата по вертикали
 	int direct = 0; // направление (0 - вниз, 1 - влево, 2 - вверх, 3 - вправо)
 	int markers = 0;
-	int Field_result[10][10];
+	int** Field_result = new int*[10];
 public:
+	int* gets_x() {
+		return &x;
+	}//с указателем
 
 	int get_x() {
 		return x;
@@ -30,8 +32,8 @@ public:
 		y = Y;
 	}
 
-	int get_direct() {
-		return direct;
+	int *get_direct() {
+		return &direct;
 	}
 	void set_direct(int Direct) {
 		direct = Direct;
@@ -45,30 +47,27 @@ public:
 	}
 
 	int get_Field_state() {
-		return *Field_state;
+		return **Field_state;
 	}
 
-	int *get_Field_result() {
-		return (&Field_result)[10][10];
+	int get_Field_result() {
+		return **Field_result;
 	}
 };
 
 class OUTPUT_PROP : private MEMORY {
 public:
-	void prop(int x, int y, int direct, int markers, int Field_state) {
+	void prop(int x, int y, int direct, int markers, int** Field_state) {
 		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 	}
 };
 
-
-
 class RIGTH {
 public:
-	int To_the_right(int direct) {
+	void To_the_right(int &direct) {
 		if (direct != 3) direct++;
 		else direct = 0;
 		cout << "Command completed." << endl;
-		return direct;
 	}
 };
 
@@ -116,14 +115,73 @@ public:
 			y = buf_y;
 			cout << "Command completed." << endl;
 		}
-		return x,y;
+		return x, y;
 	}
 
 };
 
-class OWERWRITE : private MEMORY {
+class NEWARRAY {
 public:
-	void Overwrite() {
+	void inArray(int **Field_state) {
+		for (int i = 0; i < 10;i++) {
+			Field_state[i] = new int[10];
+		}
+	}
+	void Arrayfull(int **Field_state, bool File) {
+		//Создаем файловый поток и связываем его с файлом
+		ifstream in;
+		if (File == 0) ifstream in("input.txt");
+		else ifstream in("result.txt");
+
+		if (in.is_open())
+		{
+			//Если открытие файла прошло успешно
+
+			//Вначале посчитаем сколько чисел в файле
+			int count = 0;// число чисел в файле
+			int temp;//Временная переменная
+
+			while (!in.eof())// пробегаем пока не встретим конец файла eof
+			{
+				in >> temp;
+				count++;
+			}
+			//посчитаем число пробелов до знака перевода на новую строку 
+
+			//Вначале переведем каретку в потоке в начало файла
+			in.seekg(0, ios::beg);
+			in.clear();
+
+			//Число пробелов в первой строчке вначале равно 0
+			int count_space = 0;
+			char symbol;
+			while (!in.eof())//на всякий случай цикл ограничиваем концом файла
+			{
+				//теперь нам нужно считывать не числа, а посимвольно считывать данные
+				in.get(symbol);//считали текущий символ
+				if (symbol == ' ') count_space++;//Если это пробел, то число пробелов увеличиваем
+				if (symbol == '\n') break;//Если дошли до конца строки, то выходим из цикла
+			}
+
+			//Опять переходим в потоке в начало файла
+			in.seekg(0, ios::beg);
+			in.clear();
+
+			if (count == 100 && count_space == 9) {
+				for (int i = 0; i < 10; i++)
+					for (int j = 0; j < 10; j++)
+						in >> Field_state[i][j];
+			}
+
+			in.close();//под конец закроем файла
+		}
+		else
+		{
+			//Если открытие файла прошло не успешно
+			cout << "Files not found.";
+		}
+	}
+	void Overwrite(int **Field_state) {
 		ofstream out("output.txt");
 		//Выведем матрицу
 		if (out.is_open()) {
@@ -181,7 +239,7 @@ public:
 
 class TEST : private MEMORY {
 public:
-	void Test() {
+	void Test(int** Field_state,int** Field_result) {
 		bool F = true;
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
@@ -201,13 +259,21 @@ private:
 	LEFT left;
 	RIGTH right;
 	MOVE move;
-	OWERWRITE ower;
+	NEWARRAY create;
 	TAKE_MARKER take;
 	PUT_MARKER put;
 	TEST test;
 	OUTPUT_PROP output;
 	MEMORY memory;
 public:
+	void CreateArrays() {
+		create.inArray(memory.get_Field_state);
+		create.Arrayfull(memory.get_Field_state, 0);
+		create.Overwrite(memory.get_Field_state);
+		create.inArray(memory.get_Field_result);
+		create.Arrayfull(memory.get_Field_result, 1);
+		create.Overwrite(memory.get_Field_result);
+	}
 	void Command(int n) {
 		switch (n) {
 		case 1:
@@ -216,7 +282,7 @@ public:
 			break;
 		case 2:
 			cout << "Command is executed to the right." << endl;
-			memory.set_direct(right.To_the_right(memory.get_direct()));
+			right.To_the_right(memory.get_direct);
 			break;
 		case 11:
 			cout << "Command is executed step forward." << endl;
@@ -225,21 +291,21 @@ public:
 		case 21:
 			cout << "Command is executed to take the marker." << endl;
 			take.Take_marker();
-			ower.Overwrite();
+			create.Overwrite(memory.get_Field_state);
 			break;
 		case 22:
 			cout << "Command is executedto put the marker." << endl;
 			put.Put_marker();
-			ower.Overwrite();
+			create.Overwrite(memory.get_Field_state);
 			break;
 		case 31:
 			cout << "Command is executed to test." << endl;
-			test.Test();
+			test.Test(memory.get_Field_state, memory.get_Field_result);
 			break;
 		default:
 			cout << "Unknown command." << endl;
 		}
-		output.prop(memory.get_x(), memory.get_y(),memory.get_direct(), memory.get_markers(),memory.get_Field_state());
+		output.prop(memory.get_x(), memory.get_y(), memory.get_direct(), memory.get_markers(), memory.get_Field_state);
 	}
 };
 
@@ -342,7 +408,7 @@ int main(int argc, char* argv[]) {
 
 	cout << "Welcome to Robot Marker! I present to you a list of commands :" << endl << "Direction (0 - down, 1 - left, 2 - up, 3 - right)" << endl << "1 - Turn left" << endl << "2 - Turn right" << endl << "11 - Step forward" << endl << "21 - Take the marker" << endl << "22 - Put the marker" << endl << "31 - Test " << endl; /*Вас приветствует робот маркировщик!
 																																																																																	  Представляю вам перечень команд :
-																																																																															  */
+																																																																																	  */
 	{
 
 		int Commands[206] = { 11,21,1,1,11,2,11,11,11,21,2,2,11,1,11,11,11,2,11,11,1,11,21,2,2,11,2,11,11,2,11,11,1,11,2,11,11,2,11,11,11,2,11,21,2,2,11,11,11,1,11,21,1,1,11,2,11,11,2,11,11,11,2,11,11,1,11,21,1,1,11,2,11,11,2,11,11,1,11,2,11,11,2,11,11,11,2,11,21,2,2,11,11,11,1,11,21,1,1,11,2,11,11,2,11,11,11,2,11,11,1,11,21,1,1,11,2,11,11,2,11,11,1,11,2,11,11,11,11,1,11,21,1,1,11,2,11,11,1,11,11,11,2,11,21,1,1,11,11,11,1,11,21,1,1,11,2,11,11,2,11,11,11,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,11,1,11,22,11,1,11,22,2,11,22,31 };
