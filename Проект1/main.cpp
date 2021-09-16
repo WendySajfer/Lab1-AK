@@ -7,7 +7,8 @@ using namespace std;
 
 class MEMORY {
 private:
-	int Field_state[10][10]; // состояние поля
+	int** Field_state = new int*[10]; // состояние поля
+	for (int )
 	int x = 0; // координата по горизонтали
 	int y = 0; // координата по вертикали
 	int direct = 0; // направление (0 - вниз, 1 - влево, 2 - вверх, 3 - вправо)
@@ -43,8 +44,8 @@ public:
 		markers = Markers;
 	}
 
-	int (& get_Field_state())[10] {
-		return (&Field_state)[10][10];
+	int get_Field_state() {
+		return *Field_state;
 	}
 
 	int *get_Field_result() {
@@ -54,7 +55,7 @@ public:
 
 class OUTPUT_PROP : private MEMORY {
 public:
-	void prop(int x, int y, int direct, int markers, int (&Field_state)[10][10]) {
+	void prop(int x, int y, int direct, int markers, int Field_state) {
 		cout << "Command completed. Coordinates (" << x << ";" << y << "); Direction: " << direct << "; Markers: " << markers << "; Coordinate state: " << Field_state[y][x] << "." << endl;
 	}
 };
