@@ -237,7 +237,6 @@ public:
 		}
 		if (F) {
 			cout << "Congratulations! Result achieved." << endl;
-			system("pause");
 		}
 		else cout << "The result is not correct." << endl;
 	}
@@ -255,6 +254,17 @@ private:
 	OUTPUT_PROP output;
 	MEMORY memory;
 public:
+	void new_state() {
+		cout << "Start." << endl;
+		create.inArray(memory.get_Field_state());
+		create.Arrayfull(memory.get_Field_state(), 0);
+		create.Overwrite(memory.get_Field_state());
+		create.inArray(memory.get_Field_result());
+		create.Arrayfull(memory.get_Field_result(), 1);
+		create.Overwrite(memory.get_Field_result());
+		output.prop(memory.get_x(), memory.get_y(), memory.get_direct(), memory.get_markers(), memory.get_Field_state());
+		cout << "Welcome to Robot Marker! I present to you a list of commands :" << endl << "Direction (0 - down, 1 - left, 2 - up, 3 - right)" << endl << "1 - Turn left" << endl << "2 - Turn right" << endl << "11 - Step forward" << endl << "21 - Take the marker" << endl << "22 - Put the marker" << endl << "31 - Test " << endl;
+	}
 	void Commands(int n) {
 		switch (n) {
 		case 1:
@@ -288,32 +298,25 @@ public:
 		}
 		output.prop(memory.get_x(), memory.get_y(), memory.get_direct(), memory.get_markers(), memory.get_Field_state());
 	}
+	void del_state() {
+		create.DestructorArray(memory.get_Field_state());
+		create.DestructorArray(memory.get_Field_result());
+	}
 };
 class ROBOT {
 private:
-	NEWARRAY create;
-	OUTPUT_PROP output;
 	MEMORY memory;
 	COMMAND_PROCESS pro;
 public:
 	void Begin() {
-		cout << "Start." << endl;
-		create.inArray(memory.get_Field_state());
-		create.Arrayfull(memory.get_Field_state(), 0);
-		create.Overwrite(memory.get_Field_state());
-		create.inArray(memory.get_Field_result());
-		create.Arrayfull(memory.get_Field_result(), 1);
-		create.Overwrite(memory.get_Field_result());
-		output.prop(memory.get_x(), memory.get_y(), memory.get_direct(), memory.get_markers(), memory.get_Field_state());
-		cout << "Welcome to Robot Marker! I present to you a list of commands :" << endl << "Direction (0 - down, 1 - left, 2 - up, 3 - right)" << endl << "1 - Turn left" << endl << "2 - Turn right" << endl << "11 - Step forward" << endl << "21 - Take the marker" << endl << "22 - Put the marker" << endl << "31 - Test " << endl;
+		pro.new_state();
 	}
 	void Work(int n) {
 		if (n == 0) pro.Commands(memory.get_Commands());
 		else pro.Commands(n);
 	}
-	void del() {
-		create.DestructorArray(memory.get_Field_state());
-		create.DestructorArray(memory.get_Field_result());
+	void Finish() {
+		pro.del_state();
 	}
 };
 
@@ -327,9 +330,10 @@ int main(int argc, char* argv[]) {
 
 	for (int i = 0; i < 206; i++) {
 		int t = 0;
-		t = getch();// как вводить
+		//t = getch();// как вводить
+		cin.get();
 		robot.Work(t);
 	}
-	robot.del();
+	robot.Finish();
 	return 0;
 }
