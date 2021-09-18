@@ -2,6 +2,7 @@
 #include <fstream>
 #include <windows.h>
 #include <string>
+#include <conio.h>
 
 using namespace std;
 
@@ -43,7 +44,7 @@ public:
 class OUTPUT_PROP {
 public:
 	void prop(int* x, int* y, int* direct, int *markers, int** Field_state) {
-		cout << "Command completed. Coordinates (" << *x << ";" << *y << "); Direction: " << *direct << "; Markers: " << *markers << "; Coordinate state: " << Field_state[*y][*x] << "." << endl;
+		cout << "Coordinates (" << *x << ";" << *y << "); Direction: " << *direct << "; Markers: " << *markers << "; Coordinate state: " << Field_state[*y][*x] << "." << endl;
 	}
 };
 
@@ -164,7 +165,7 @@ public:
 			cout << "Files not found.";
 		}
 	}
-	void Overwrite(int **Field_state) {
+	void Out_Array(int **Field_state) {
 		ofstream out("output.txt");
 		//Выведем матрицу
 		if (out.is_open()) {
@@ -200,7 +201,7 @@ public:
 			return;
 		}
 		else {
-			markers++;
+			(*markers)++;
 			Field_state[*y][*x] = 0;
 			cout << "Command completed." << endl;
 		}
@@ -210,7 +211,7 @@ public:
 class PUT_MARKER {
 public:
 	void Put_marker(int* x, int* y, int* markers, int** Field_state) {
-		if (markers == 0) {
+		if (*markers == 0) {
 			cout << "The robot has no markers." << endl;
 			return;
 		}
@@ -220,7 +221,7 @@ public:
 		}
 		else {
 			Field_state[*y][*x] = 1;
-			markers--;
+			(*markers)--;
 			cout << "Command completed." << endl;
 		}
 	}
@@ -228,7 +229,7 @@ public:
 
 class TEST {
 public:
-	void Test(int** Field_state,int** Field_result) {
+	void Test(int** Field_state,int** Field_result, int* h) {
 		bool F = true;
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
@@ -236,9 +237,143 @@ public:
 			}
 		}
 		if (F) {
-			cout << "Congratulations! Result achieved." << endl;
+			cout << "\x1b[32mCongratulations! Result achieved.\x1b[0m" << endl;
+			(*h)++;
 		}
-		else cout << "The result is not correct." << endl;
+		else cout << "\x1b[31mThe result is not correct.\x1b[0m" << endl;
+	}
+};
+
+class OVERWRITE {
+public:
+	void Overwrite(int** Field_state) {
+		system("cls"); // отчистка консоли
+		for (int i = 0; i < 5; i++) {
+			cout << "\n" << endl;
+		}
+		cout << "List of commands :" << endl << "Direction (0 - down, 1 - left, 2 - up, 3 - right)" << endl << "1 - Turn left" << endl << "2 - Turn right" << endl << "11 - Step forward" << endl << "21 - Take the marker" << endl << "22 - Put the marker" << endl << "31 - Test " << endl;
+	}
+	void Overwrite1(int** Field_state, int *x, int *y, int *direct, int way) {
+		Cursor_hide();
+		Cursor(0, 0);
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				char symbol = ' ';
+				if (j == *x && i == *y) {
+					switch(*direct) {
+					case 0: symbol = 'v';
+						break;
+					case 1: symbol = '<';
+						break;
+					case 2: symbol = '^';
+						break;
+					case 3: symbol = '>';
+						break;
+					default: symbol = '?';
+					}
+				}
+				switch (Field_state[i][j]) {
+				case 0:
+					cout << "\x1b[47;30m" << symbol << "\x1b[0m";
+					break;
+				case 1:
+					cout << "\x1b[42;30m" << symbol << "\x1b[0m";
+					break;
+				case 2:
+					cout << "\x1b[41;30m" << symbol << "\x1b[0m";
+					break;
+				default:
+					cout << "\x1b[45;30m" << symbol << "\x1b[0m";
+					break;
+				}
+			}
+			cout << "\n";
+		}
+		if (way == 2) {
+			Cursor_view();
+		}
+	}
+	void Cursor(int x1, int y1) {
+		HANDLE hCon;
+		COORD cPos;
+		hCon = GetStdHandle(STD_OUTPUT_HANDLE); // позиция курсора
+		cPos.X = x1;
+		cPos.Y = y1;
+		SetConsoleCursorPosition(hCon, cPos);
+	}
+	void Cursor_hide() {
+		HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+		CONSOLE_CURSOR_INFO info;
+		GetConsoleCursorInfo(consoleHandle, &info);
+		info.bVisible = FALSE;
+		SetConsoleCursorInfo(consoleHandle, &info);
+	}
+	void Cursor_view() {
+		HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+		CONSOLE_CURSOR_INFO info;
+		GetConsoleCursorInfo(consoleHandle, &info);
+		info.bVisible = TRUE;
+		SetConsoleCursorInfo(consoleHandle, &info);
+	}
+};
+
+class KEYBOARD {
+private:
+	int keyboard() {
+		int ch = -1;
+		ch = _getch();
+		if (_kbhit()) { // когда нажата клавиша
+			cout << ch;
+		}
+		return ch;
+	}
+public:
+	int Inkey() {
+		int buf = 4;
+		bool stop = 0;
+		int i = 0;
+		int symbol_index;
+		while (!stop) {
+			symbol_index = keyboard();
+			if (i == 0) {
+				switch (symbol_index) {
+				case 49: buf = 1;
+					cout << '1';
+					break;
+				case 50: buf = 2;
+					cout << '2';
+					break;
+				case 51: buf = 3;
+					cout << '3';
+					break;
+				case 13: stop = 1;
+					cout << endl;
+					break; 
+				}
+			}
+			else if (i == 1) {
+				switch (symbol_index) {
+				case 49: buf = buf * 10 + 1;
+					cout << '1';
+					break;
+				case 50: buf = buf * 10 + 2;
+					cout << '2';
+					break;
+				case 13: stop = 1;
+					cout << endl;
+					break;
+				}
+			}
+			else {
+				switch (symbol_index) {
+				case 13: stop = 1;
+					cout << endl;
+					break;
+				}
+			}
+			i++;
+		}
+		return buf;
 	}
 };
 
@@ -253,24 +388,30 @@ private:
 	TEST test;
 	OUTPUT_PROP output;
 	MEMORY memory;
+	OVERWRITE over;
 public:
+	void Over_state() {
+		over.Overwrite(memory.get_Field_state());
+	}
+	void Over_state1(int way) {
+		over.Overwrite1(memory.get_Field_state(), memory.get_x(), memory.get_y(), memory.get_direct(), way);
+	}
 	void new_state() {
-		cout << "Start." << endl;
 		create.inArray(memory.get_Field_state());
 		create.Arrayfull(memory.get_Field_state(), 0);
-		create.Overwrite(memory.get_Field_state());
 		create.inArray(memory.get_Field_result());
 		create.Arrayfull(memory.get_Field_result(), 1);
-		create.Overwrite(memory.get_Field_result());
+		Over_state();
+		cout << endl;
 		output.prop(memory.get_x(), memory.get_y(), memory.get_direct(), memory.get_markers(), memory.get_Field_state());
-		cout << "Welcome to Robot Marker! I present to you a list of commands :" << endl << "Direction (0 - down, 1 - left, 2 - up, 3 - right)" << endl << "1 - Turn left" << endl << "2 - Turn right" << endl << "11 - Step forward" << endl << "21 - Take the marker" << endl << "22 - Put the marker" << endl << "31 - Test " << endl;
 	}
-	void Commands(int n) {
+	void Commands(int n, int *h) {
 		switch (n) {
 		case 1:
 			cout << "Command is executed to the left." << endl;
 			left.To_the_left(memory.get_direct());
 			break;
+
 		case 2:
 			cout << "Command is executed to the right." << endl;
 			right.To_the_right(memory.get_direct());
@@ -282,16 +423,16 @@ public:
 		case 21:
 			cout << "Command is executed to take the marker." << endl;
 			take.Take_marker(memory.get_x(), memory.get_y(), memory.get_markers(), memory.get_Field_state());
-			create.Overwrite(memory.get_Field_state());
+			//create.Overwrite(memory.get_Field_state());
 			break;
 		case 22:
 			cout << "Command is executedto put the marker." << endl;
 			put.Put_marker(memory.get_x(), memory.get_y(), memory.get_markers(), memory.get_Field_state());
-			create.Overwrite(memory.get_Field_state());
+			//create.Overwrite(memory.get_Field_state());
 			break;
 		case 31:
 			cout << "Command is executed to test." << endl;
-			test.Test(memory.get_Field_state(), memory.get_Field_result());
+			test.Test(memory.get_Field_state(), memory.get_Field_result(), h);
 			break;
 		default:
 			cout << "Unknown command." << endl;
@@ -299,21 +440,57 @@ public:
 		output.prop(memory.get_x(), memory.get_y(), memory.get_direct(), memory.get_markers(), memory.get_Field_state());
 	}
 	void del_state() {
+		create.Out_Array(memory.get_Field_state());
 		create.DestructorArray(memory.get_Field_state());
 		create.DestructorArray(memory.get_Field_result());
 	}
 };
+
 class ROBOT {
 private:
 	MEMORY memory;
+	KEYBOARD key;
 	COMMAND_PROCESS pro;
+	OVERWRITE over;
 public:
-	void Begin() {
-		pro.new_state();
+	int Start() {
+		int f;
+		cout << "Welcome to Robot Marker!" << endl << "1.Auto process" << endl << "2.Manual work" << endl;
+		cin >> f;
+		if (f == 1) {
+			over.Cursor_hide();
+		}
+		return f;
 	}
-	void Work(int n) {
-		if (n == 0) pro.Commands(memory.get_Commands());
-		else pro.Commands(n);
+	void Begin(int way) {
+		pro.new_state();
+		pro.Over_state1(way);
+	}
+	int input(int way) {
+		int key_n = 0;
+
+		if (way == 2) {
+			over.Cursor(0, 18);
+			key_n = key.Inkey();
+		}
+		else cin.get();
+
+		pro.Over_state();
+
+		if (way == 2) {
+			cout << endl;
+		}
+		return key_n;
+	}
+	void Work(int *h, int n) {
+		if (n == 0) {
+			pro.Commands(memory.get_Commands(), h);
+			pro.Over_state1(1);
+		}
+		else {
+			pro.Commands(n, h);
+			pro.Over_state1(2);
+		}
 	}
 	void Finish() {
 		pro.del_state();
@@ -326,14 +503,18 @@ int main(int argc, char* argv[]) {
 	SetConsoleOutputCP(1251);
 
 	ROBOT robot;
-	robot.Begin();
-
-	for (int i = 0; i < 206; i++) {
-		int t = 0;
-		//t = getch();// как вводить
-		cin.get();
-		robot.Work(t);
+	int way;
+	int h = 0;
+	way = robot.Start();
+	robot.Begin(way);
+	cin.get();
+	while (h == 0) {
+		int t = robot.input(way);
+		robot.Work(&h, t);//Попробовать с разбиением классов на файлы 
 	}
+
 	robot.Finish();
+	
+	system("pause");
 	return 0;
 }
