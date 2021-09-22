@@ -28,7 +28,7 @@ int KEYBOARD::Inkey()
 				cout << '3';
 				break;
 			default:
-				i--;
+				i = i - 2;
 			}
 			i++;
 		}
