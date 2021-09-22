@@ -110,12 +110,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="COMMANDS.cpp" />
+    <ClCompile Include="COMMAND_PROCESS.cpp" />
+    <ClCompile Include="KEYBOARD.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MEMORY.cpp" />
+    <ClCompile Include="NEWARRAY.cpp" />
+    <ClCompile Include="OVERWRITE.cpp" />
+    <ClCompile Include="ROBOT.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="input.txt" />
     <Text Include="output.txt" />
     <Text Include="result.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="COMMANDS.h" />
+    <ClInclude Include="COMMAND_PROCESS.h" />
+    <ClInclude Include="KEYBOARD.h" />
+    <ClInclude Include="MEMORY.h" />
+    <ClInclude Include="NEWARRAY.h" />
+    <ClInclude Include="OVERWRITE.h" />
+    <ClInclude Include="ROBOT.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
