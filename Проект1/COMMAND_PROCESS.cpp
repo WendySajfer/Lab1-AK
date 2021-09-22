@@ -1,17 +1,17 @@
 #include "COMMAND_PROCESS.h"
 
-void COMMAND_PROCESS::Over_state() {
-	over.Overwrite(memory.get_Field_state());
+void COMMAND_PROCESS::Over_state(int way) {
+	over.Overwrite(memory.get_Field_state(), way);
 }
 void COMMAND_PROCESS::Over_state1(int way) {
 	over.Overwrite1(memory.get_Field_state(), memory.get_x(), memory.get_y(), memory.get_direct(), way);
 }
-void COMMAND_PROCESS::new_state() {
+void COMMAND_PROCESS::new_state(int way) {
 	create.inArray(memory.get_Field_state());
 	create.Arrayfull(memory.get_Field_state(), 0);
 	create.inArray(memory.get_Field_result());
 	create.Arrayfull(memory.get_Field_result(), 1);
-	Over_state();
+	Over_state(way);
 	cout << endl;
 	output.prop(memory.get_x(), memory.get_y(), memory.get_direct(), memory.get_markers(), memory.get_Field_state());
 }

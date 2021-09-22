@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 	cin.get();
 	while (h == 0) {
 		int t = robot.input(way);
-		robot.Work(&h, t);//Попробовать с разбиением классов на файлы 
+		robot.Work(&h, t);
 	}
 
 	robot.Finish();

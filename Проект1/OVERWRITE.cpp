@@ -1,11 +1,12 @@
 #include "OVERWRITE.h"
 
-void OVERWRITE::Overwrite(int** Field_state) {
+void OVERWRITE::Overwrite(int** Field_state, int way) {
 	system("cls"); // отчистка консоли
 	for (int i = 0; i < 5; i++) {
 		cout << "\n" << endl;
 	}
-	cout << "List of commands :" << endl << "Direction (0 - down, 1 - left, 2 - up, 3 - right)" << endl << "1 - Turn left" << endl << "2 - Turn right" << endl << "11 - Step forward" << endl << "21 - Take the marker" << endl << "22 - Put the marker" << endl << "31 - Test " << endl;
+	if (way == 2) cout << "List of commands :" << endl << "Direction (0 - down, 1 - left, 2 - up, 3 - right)" << endl << "1 - Turn left" << endl << "2 - Turn right" << endl << "11 - Step forward" << endl << "21 - Take the marker" << endl << "22 - Put the marker" << endl << "31 - Test " << endl;
+	else cout << "Press the Enter." << endl;
 }
 void OVERWRITE::Overwrite1(int** Field_state, int* x, int* y, int* direct, int way) {
 	Cursor_hide();
