@@ -12,7 +12,7 @@ int KEYBOARD::Inkey()
 	int buf = 4;
 	bool stop = 0;
 	int i = 0;
-	int buf1;
+	int buf1 = 4;
 	int symbol_index;
 	while (!stop) {
 		symbol_index = keyboard();
@@ -28,7 +28,7 @@ int KEYBOARD::Inkey()
 				cout << '3';
 				break;
 			default:
-				i = i - 2;
+				i--;
 			}
 			i++;
 		}
@@ -46,7 +46,7 @@ int KEYBOARD::Inkey()
 			case 8: over.Cursor(0, 18);
 				cout << ' ';
 				over.Cursor(0, 18);
-				i--;
+				i = i - 2;
 				break;
 			default:
 				i--;
